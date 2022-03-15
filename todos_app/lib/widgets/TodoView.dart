@@ -1,6 +1,8 @@
 // ignore_for_file: prefer_const_constructors, file_names, prefer_const_literals_to_create_immutables, must_be_immutable, prefer_initializing_formals
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:todos_app/controller/ListController.dart';
 import 'package:todos_app/models/Todo.dart';
 import 'package:todos_app/models/User.dart';
 import 'package:todos_app/pages/home.dart';
@@ -8,12 +10,14 @@ import 'package:todos_app/pages/home.dart';
 
 class TodoView extends StatelessWidget {
   
-  TodoView(Todo todo, User user) {
+  TodoView(Todo todo, User user, ListController todoListController) {
     this.todo = todo;
     this.user = user;
+    this.todoListController = todoListController;
   }
   late User user;
   late Todo todo;
+  late ListController todoListController;
 
   @override
   Widget build(BuildContext context) {
@@ -101,13 +105,9 @@ class TodoView extends StatelessWidget {
                           child: Text("Yes"),
                           onPressed: (){
                             user.removeTodos(todo);
-                            Navigator.pushAndRemoveUntil<dynamic>(
-                                    context,
-                                    MaterialPageRoute<dynamic>(
-                                      builder: (BuildContext context) => homePage(user),
-                                    ),
-                                    (route) => false,//if you want to disable back feature set to false
-                            );
+                            todoListController.updateTodos(user.todos);
+                            Navigator.of(context).pop();
+                            Get.off(homePage(user));
                           },
                         ),
                       ],

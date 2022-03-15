@@ -16,10 +16,7 @@ class loginPage extends StatelessWidget {
   final List<User> users = [];
 
   void addUsers(){
-    users.add(new User("ABC", "ABC", "ABC"));
-    users.add(new User("ABCD", "ABCD", "ABCD"));
-    users.add(new User("ABCDE", "ABCDE", "ABCDE"));
-    users.add(new User("ABCED", "ABCED", "ABCED"));
+    users.add(new User("Testing Name", "testing@testing.com", "testing"));
   }
 
   @override
@@ -105,8 +102,8 @@ class loginPage extends StatelessWidget {
                                 if(_emailController.text == user.email && _passwordController.text == user.password){
                                     Navigator.pushReplacement(context, MaterialPageRoute<void>(
                                       builder: (BuildContext context) => homePage(user),
-                                    ),
-                                  );
+                                      ),
+                                    );
                                   isValid = false;
                                 }
                               }

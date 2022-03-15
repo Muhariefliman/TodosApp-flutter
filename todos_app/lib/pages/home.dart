@@ -1,25 +1,26 @@
-// ignore_for_file: prefer_const_constructors, prefer_is_empty, prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_constructors, prefer_is_empty, prefer_const_literals_to_create_immutables, must_be_immutable, use_key_in_widget_constructors, prefer_initializing_formals
 
 import 'package:flutter/material.dart';
 import 'package:todos_app/models/Todo.dart';
+import 'package:get/get.dart';
+
 import 'package:todos_app/models/User.dart';
 import 'package:todos_app/pages/profile.dart';
+
+import 'package:todos_app/widgets/add_todo.dart';
 import '../widgets/TodoView.dart';
-import 'package:get/get.dart';
+
+
+import 'package:todos_app/controller/ListController.dart';
 
 class homePage extends StatelessWidget {
   homePage(User user) {
     this.user = user;
-    todos = user.getTodos();
+    todoListController.updateTodos(user.getTodos());
   }
 
   late User user;
-  late List<Todo> todos;
-  final TextEditingController _titileController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _dateController = TextEditingController();
-  final TextEditingController _timeController = TextEditingController();
-
+  final ListController todoListController = Get.put(ListController());
 
   @override
   Widget build(BuildContext context) {
@@ -32,69 +33,7 @@ class homePage extends StatelessWidget {
             child: TextButton(onPressed: (){
               showDialog(
                   context: context, 
-                    builder: (BuildContext context) => AlertDialog(
-                    title: const Text('Add Todo', style: TextStyle(fontWeight: FontWeight.bold),),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextField(
-                          controller: _titileController,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Todo(s) Title',
-                          ),
-                        ),
-                        SizedBox(height: 15,),
-                        TextField(
-                          controller: _descriptionController,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Todo(s) Description',
-                          ),
-                        ),
-                        SizedBox(height: 15,),
-                        TextField(
-                          controller: _dateController,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Todo(s) Date',
-                          ),
-                        ),
-                        SizedBox(height: 15,),
-                        TextField(
-                          controller: _timeController,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Todo(s) Time',
-                          ),
-                        ),
-                      ],
-                    ),
-                    actions: <Widget>[
-                      TextButton(
-                        onPressed: () => {
-                          Navigator.pop(context),
-                        },
-                       child: Text('Cancel')
-                      ),
-                      TextButton(
-                        onPressed: () => {
-                          if(_titileController.text.isNotEmpty && _descriptionController.text.isNotEmpty && _dateController.text.isNotEmpty && _timeController.text.isNotEmpty) {
-                            user.addTodos(_titileController.text, _descriptionController.text, _dateController.text, _timeController.text),
-                            Navigator.pushAndRemoveUntil<dynamic>(
-                                    context,
-                                    MaterialPageRoute<dynamic>(
-                                      builder: (BuildContext context) => homePage(user),
-                                    ),
-                                    (route) => false,//if you want to disable back feature set to false
-                            ),
-                          }
-                        },
-                        child: const Text('Add Todo'),
-                      ),
-                      
-                    ],
-                  ),
+                    builder: (BuildContext context) => add_todos(user: user, todoListController: todoListController),
                 );
             }, child: Row(
               children: [
@@ -123,18 +62,23 @@ class homePage extends StatelessWidget {
       ),
       body: ListView(
         padding: EdgeInsets.symmetric(horizontal: 10),
-        // ignore: prefer_const_literals_to_create_immutables
         children: [
-          if(todos.isEmpty)
-            Center(
-              child: Container(
-                padding: EdgeInsets.all(20),
-                child: Text("No todos yet", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),),
-              ),
-            ),
-          if(todos.isNotEmpty)
-            for(Todo todo in todos)
-              TodoView(todo, user),
+          Obx(() => 
+            todoListController.todos.length == 0 ? 
+            Center(child: Column(
+              children: [
+                SizedBox(height: 100,),
+                Text("No Todo(s) Added", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+              ],
+            )) :
+            ListView.builder(
+              shrinkWrap: true,
+              itemCount: todoListController.todos.length,
+              itemBuilder: (BuildContext context, int index) {
+                return TodoView(todoListController.todos[index], user, todoListController);
+              },
+            )
+          ),
         ],
       ),
     );
